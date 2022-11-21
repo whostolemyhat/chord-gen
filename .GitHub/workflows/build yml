@@ -1,0 +1,55 @@
+# https://github.com/actions-rs/meta/blob/master/recipes/quickstart.md
+name: Check build
+on: [push, pull_request]
+
+jobs:
+  check-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install deps
+        run: sudo apt-get install libasound2-dev libudev-dev -y
+      - name: Run cargo check
+        uses: actions-rs/cargo@v1
+        with:
+          command: check
+
+      
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install deps
+        run: sudo apt-get install libasound2-dev libudev-dev -y
+      - uses: actions-rs/toolchain@v1
+        name: Install fmt
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: rustfmt
+      - uses: actions-rs/cargo@v1
+        name: Lint
+        with:
+          command: fmt
+          args: --all -- --check
+
+  clippy:
+    name: Clippy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install deps
+        run: sudo apt-get install libasound2-dev libudev-dev -y
+      - uses: actions-rs/toolchain@v1
+        name: Install Clippy
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+          components: clippy
+      - uses: actions-rs/cargo@v1
+        name: Clippy
+        with:
+          command: clippy
+          args: -- -D warnings
