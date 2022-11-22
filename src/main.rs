@@ -97,11 +97,18 @@ struct Settings<'a> {
 }
 
 fn main() {
+    // let d_settings = Settings {
+    //     frets: vec![0, 0, 0, 2, 3, 2],
+    //     fingers: vec!["x", "x", "0", "2", "3", "1"],
+    //     size: 1,
+    //     title: "D",
+    // };
+
     let settings = Settings {
-        frets: vec![0, 0, 0, 2, 3, 2],
-        fingers: vec!["x", "x", "0", "2", "3", "1"],
+        frets: vec![5, 7, 7, 6, 5, 5],
+        fingers: vec!["1", "3", "4", "2", "1", "1"],
         size: 1,
-        title: "D",
+        title: "A",
     };
 
     let selected_size = std::cmp::min(settings.size, 4) - 1;
@@ -143,6 +150,9 @@ fn main() {
     context.new_path();
 
     let has_open = settings.fingers.contains(&"0");
+    let lowest_fret = settings.fingers.filter(|finger| ).map(|finger | {
+
+    })
 
     draw_grid(&context, string_space, margin, has_open);
 

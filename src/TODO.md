@@ -1,8 +1,8 @@
+- starting fret
 - clap
 - barre
 - optional
-- title
+- title centre
 - font licence
 - sanity checks
-- size
 - inverse palette
