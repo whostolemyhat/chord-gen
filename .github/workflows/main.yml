@@ -16,7 +16,6 @@ jobs:
         with:
           command: check
 
-
   format:
     runs-on: ubuntu-latest
     steps:
@@ -45,8 +44,8 @@ jobs:
       - uses: actions/checkout@v3
       - name: Install deps
         run: |
-        sudo apt-get update
-        sudo apt-get install libasound2-dev libudev-dev -y
+          sudo apt-get update
+          sudo apt-get install libasound2-dev libudev-dev -y
       - uses: actions-rs/toolchain@v1
         name: Install Clippy
         with:
