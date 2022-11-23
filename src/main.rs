@@ -186,10 +186,12 @@ fn main() {
     context.new_path();
 
     let has_open = settings.fingers.contains(&'0');
-    let lowest_fret = match settings.frets.iter().filter(|fret| **fret >= 0).min() {
-        Some(fret) => fret,
-        None => &0,
-    };
+    let lowest_fret = settings
+        .frets
+        .iter()
+        .filter(|fret| **fret >= 0)
+        .min()
+        .unwrap_or(&0);
 
     draw_grid(&context, string_space, margin, has_open);
 
