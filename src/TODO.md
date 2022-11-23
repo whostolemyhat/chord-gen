@@ -1,8 +1,11 @@
 - starting fret
-- clap
 - barre
+- larger grid
+- image hash
+- so many magic numbers
 - optional
 - title centre
+- clap
 - font licence
 - sanity checks
 - inverse palette
