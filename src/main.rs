@@ -1,5 +1,6 @@
 use cairo::{Context, FontSlant, FontWeight, Format, ImageSurface};
 use std::fs::File;
+use std::path::Path;
 
 #[derive(Debug)]
 enum GuitarString {
@@ -110,7 +111,7 @@ fn draw_fingering(
 fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f64) {
     let offset_top = 64.;
     context.move_to(
-        margin / 2.,
+        margin * 0.75,
         (string_space * 2.) + offset_top + string_space / 2.,
     );
     context
@@ -118,35 +119,14 @@ fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f
         .expect("Can't write min fret");
 }
 
-struct Settings<'a> {
+struct Chord<'a> {
     frets: Vec<i32>,    // -1 = skip
     fingers: Vec<char>, // 'x' = skip
     size: i32,
     title: &'a str,
 }
 
-fn main() {
-    // let settings = Settings {
-    //     frets: vec![0, 0, 0, 2, 3, 2],
-    //     fingers: vec!['x', 'x', '0', '2', '3', '1'],
-    //     size: 1,
-    //     title: "D",
-    // };
-
-    // let settings = Settings {
-    //     frets: vec![5, 7, 7, 6, 5, 5],
-    //     fingers: vec!['1', '3', '4', '2', '1', '1'],
-    //     size: 1,
-    //     title: "A",
-    // };
-
-    let settings = Settings {
-        frets: vec![-1, -1, 4, 5, 3, -1],
-        fingers: vec!['x', 'x', '2', '3', '1', 'x'],
-        size: 1,
-        title: "D7",
-    };
-
+fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     let selected_size = std::cmp::min(settings.size, 4) - 1;
 
     let sizes = [40., 60., 80., 100.];
@@ -223,8 +203,36 @@ fn main() {
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
-    let mut file = File::create("debug.png").expect("Can't create file for some reason");
-    surface
-        .write_to_png(&mut file)
-        .expect("Failed to draw image");
+    // TODO sanitise output dir
+    let safe_title = settings.title.replace(|c: char| !c.is_alphanumeric(), "");
+    let mut file = File::create(Path::new(output_dir).join(format!("{}.png", safe_title)))
+        .expect("Can't create file for some reason");
+    surface.write_to_png(&mut file)
+}
+
+fn main() -> Result<(), cairo::IoError> {
+    // let settings = Settings {
+    //     frets: vec![0, 0, 0, 2, 3, 2],
+    //     fingers: vec!['x', 'x', '0', '2', '3', '1'],
+    //     size: 1,
+    //     title: "D",
+    // };
+
+    let settings = Chord {
+        frets: vec![5, 7, 7, 6, 5, 5],
+        fingers: vec!['1', '3', '4', '2', '1', '1'],
+        size: 1,
+        title: "A",
+    };
+    let output_dir = "./output";
+
+    // let settings = Chord {
+    //     frets: vec![-1, -1, 4, 5, 3, -1],
+    //     fingers: vec!['x', 'x', '2', '3', '1', 'x'],
+    //     size: 1,
+    //     title: "../P7",
+    // };
+
+    render(settings, output_dir)?;
+    Ok(())
 }
