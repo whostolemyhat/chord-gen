@@ -1,4 +1,5 @@
 - starting fret
+- sharps/flats
 - barre
 - larger grid
 - image hash
@@ -9,3 +10,4 @@
 - font licence
 - sanity checks
 - inverse palette
+- actix

@@ -7,3 +7,4 @@ edition = "2021"
 
 [dependencies]
 cairo-rs = { version = "0.15.12", features = ["png"] }
+clap = "4.0.29"
