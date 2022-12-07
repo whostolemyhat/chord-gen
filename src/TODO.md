@@ -1,13 +1,12 @@
 - starting fret
-- sharps/flats
 - barre
-- larger grid
 - image hash
+- title centre
+- extended range
+- larger grid
+- sharps/flats
 - so many magic numbers
 - optional
-- title centre
-- clap
-- font licence
 - sanity checks
 - inverse palette
 - actix

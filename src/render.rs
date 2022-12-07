@@ -2,6 +2,13 @@ use cairo::{Context, FontSlant, FontWeight, Format, ImageSurface};
 use std::fs::File;
 use std::path::Path;
 
+pub struct Chord<'a> {
+    pub frets: Vec<i32>,       // -1 = skip
+    pub fingers: Vec<&'a str>, // 'x' = skip
+    pub size: i32,
+    pub title: &'a str,
+}
+
 #[derive(Debug)]
 enum GuitarString {
     E = 0,
@@ -88,7 +95,7 @@ fn draw_grid(context: &Context, string_space: f64, margin: f64, has_open: bool) 
 
 fn draw_fingering(
     context: &Context,
-    finger: &char,
+    finger: &str,
     string: GuitarString,
     string_space: f64,
     margin: f64,
@@ -119,13 +126,6 @@ fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f
         .expect("Can't write min fret");
 }
 
-pub struct Chord<'a> {
-    pub frets: Vec<i32>,    // -1 = skip
-    pub fingers: Vec<char>, // 'x' = skip
-    pub size: i32,
-    pub title: &'a str,
-}
-
 pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     let selected_size = std::cmp::min(settings.size, 4) - 1;
 
@@ -154,7 +154,8 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     context.set_line_width(2.0);
 
     // fingering
-    context.select_font_face("DejaVuSans.ttf", FontSlant::Normal, FontWeight::Bold);
+    // note font needs to be installed globally
+    context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Bold);
     context.set_font_size(64.);
 
     // 32 = font-size / 2
@@ -165,8 +166,8 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
 
     context.new_path();
 
-    let has_open = settings.fingers.contains(&'0');
-    let lowest_fret = settings
+    let has_open = settings.frets.contains(&0);
+    let lowest_fret: &i32 = settings
         .frets
         .iter()
         .filter(|fret| **fret >= 0)
@@ -191,7 +192,6 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     }
 
     // fingering
-    context.select_font_face("DejaVuSans.ttf", FontSlant::Normal, FontWeight::Bold);
     context.set_font_size(font_size);
 
     for (i, finger) in settings.fingers.iter().enumerate() {
