@@ -1,11 +1,9 @@
 use cairo::{Context, FontSlant, FontWeight, Format, ImageSurface};
 use std::fs::File;
 use std::path::Path;
-
 pub struct Chord<'a> {
     pub frets: Vec<i32>,       // -1 = skip
     pub fingers: Vec<&'a str>, // 'x' = skip
-    pub size: i32,
     pub title: &'a str,
 }
 
@@ -126,8 +124,9 @@ fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f
         .expect("Can't write min fret");
 }
 
-pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
-    let selected_size = std::cmp::min(settings.size, 4) - 1;
+pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
+    let chord_size = 1;
+    let selected_size = std::cmp::min(chord_size, 4) - 1;
 
     let sizes = [40., 60., 80., 100.];
     let string_space = sizes[selected_size as usize];
@@ -161,13 +160,13 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     // 32 = font-size / 2
     context.move_to(width / 2. - 32., margin + 32.);
     context
-        .show_text(settings.title)
+        .show_text(chord_settings.title)
         .expect("Can't write title");
 
     context.new_path();
 
-    let has_open = settings.frets.contains(&0);
-    let lowest_fret: &i32 = settings
+    let has_open = chord_settings.frets.contains(&0);
+    let lowest_fret: &i32 = chord_settings
         .frets
         .iter()
         .filter(|fret| **fret >= 0)
@@ -176,7 +175,7 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
 
     draw_grid(&context, string_space, margin, has_open);
 
-    for (i, fret) in settings.frets.iter().enumerate() {
+    for (i, fret) in chord_settings.frets.iter().enumerate() {
         if fret != &0 {
             let string: GuitarString = (i as i32).try_into().unwrap_or(GuitarString::E);
             draw_note(
@@ -194,7 +193,7 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     // fingering
     context.set_font_size(font_size);
 
-    for (i, finger) in settings.fingers.iter().enumerate() {
+    for (i, finger) in chord_settings.fingers.iter().enumerate() {
         let string: GuitarString = (i as i32).try_into().unwrap_or(GuitarString::E);
         draw_fingering(&context, finger, string, string_space, margin);
     }
@@ -204,7 +203,9 @@ pub fn render(settings: Chord, output_dir: &str) -> Result<(), cairo::IoError> {
     }
 
     // TODO sanitise output dir
-    let safe_title = settings.title.replace(|c: char| !c.is_alphanumeric(), "");
+    let safe_title = chord_settings
+        .title
+        .replace(|c: char| !c.is_alphanumeric(), "");
     let mut file = File::create(Path::new(output_dir).join(format!("{}.png", safe_title)))
         .expect("Can't create file for some reason");
     surface.write_to_png(&mut file)

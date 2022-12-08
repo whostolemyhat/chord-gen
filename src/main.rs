@@ -1,9 +1,6 @@
 // cargo run -- -f "x,x,x,0,2,0" -p "x,x,x,2,3,1" -t "D♭7"
-use crate::render::{render, Chord};
-
+use chord_gen::{render, Chord};
 use clap::{arg, Command};
-
-mod render;
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
 // https://en.wikipedia.org/wiki/Chord_notation
@@ -68,7 +65,6 @@ fn main() -> Result<(), cairo::IoError> {
     let chord = Chord {
         frets,
         fingers,
-        size: 1,
         title,
     };
 

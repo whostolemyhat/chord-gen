@@ -2,9 +2,19 @@
 name = "chord-gen"
 version = "0.1.0"
 edition = "2021"
+authors = ["James Baum <james@jamesbaum.co.uk>"]
+default-run = "chord_cli"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
 cairo-rs = { version = "0.15.12", features = ["png"] }
 clap = "4.0.29"
+
+[lib]
+name = "chord_gen"
+path = "src/lib.rs"
+
+[[bin]]
+name = "chord_cli"
+path = "src/main.rs"
