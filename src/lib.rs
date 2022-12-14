@@ -51,7 +51,7 @@ fn draw_note(
     }
 
     let sizes = [16, 24, 32, 40];
-    let offset_top = 64.;
+    let offset_top = 78.;
     let radius = sizes[size as usize] as f64;
     context.arc(
         string as i32 as f64 * string_space + (margin * 2.), // string
@@ -64,7 +64,7 @@ fn draw_note(
 }
 
 fn draw_grid(context: &Context, string_space: f64, margin: f64, has_open: bool) {
-    let offset_top = 64.;
+    let offset_top = 78.;
 
     let end = margin + 5. * string_space;
     for i in 0..6 {
@@ -98,15 +98,22 @@ fn draw_fingering(
     string_space: f64,
     margin: f64,
 ) {
-    let offset_top = 64.;
+    let offset_top = 78.;
     let font_offset = 32.;
+    let font_offset_top = 14.;
 
     // 5 = last string index
-    let end = margin + 5. * string_space;
+    // let end = margin + 5. * string_space;
+    let end = if finger == "x" || finger == "0" {
+        margin + offset_top - font_offset_top
+    } else {
+        margin + (5. * string_space) + font_offset + offset_top
+    };
 
+    let font_width = 8.;
     context.move_to(
-        string as i32 as f64 * string_space + (margin * 2.),
-        end + font_offset + offset_top,
+        string as i32 as f64 * string_space + (margin * 2.) - font_width,
+        end,
     );
     context
         .show_text(&finger.to_string()[..])
@@ -114,7 +121,7 @@ fn draw_fingering(
 }
 
 fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f64) {
-    let offset_top = 64.;
+    let offset_top = 78.;
     context.move_to(
         margin * 0.75,
         (string_space * 2.) + offset_top + string_space / 2.,
