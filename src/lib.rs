@@ -223,10 +223,90 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
     }
 
     // TODO sanitise output dir
-    let safe_title = chord_settings
-        .title
-        .replace(|c: char| !c.is_alphanumeric(), "");
+    // let safe_title = chord_settings
+    //     .title
+    //     .replace(|c: char| !c.is_alphanumeric(), "");
+    let safe_title = sanitise_filename(chord_settings.title);
     let mut file = File::create(Path::new(output_dir).join(format!("{}.png", safe_title)))
         .expect("Can't create file for some reason");
     surface.write_to_png(&mut file)
 }
+
+fn sanitise_filename(title: &str) -> String {
+    // allow letters
+    // allow nums
+    // allow dash
+    // allow flat
+    // allow sharp
+    // allow natural
+    // allow dim
+    // don't allow . < > ' "
+    title.replace(
+        |c: char| {
+            !(c.is_alphanumeric()
+                || c == '♭'
+                || c == '♯'
+                || c == '♮'
+                || c == '+'
+                || c == '-'
+                || c == ' ')
+        },
+        "",
+    )
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::sanitise_filename;
+
+    #[test]
+    fn filenames_should_allow_chars() {
+        let mut name = sanitise_filename("Hendrix");
+        assert_eq!(name, "Hendrix");
+
+        name = sanitise_filename("D-7");
+        assert_eq!(name, "D-7");
+
+        name = sanitise_filename("Asus9+");
+        assert_eq!(name, "Asus9+");
+
+        name = sanitise_filename("G minor 7");
+        assert_eq!(name, "G minor 7");
+    }
+
+    #[test]
+    fn filenames_should_allow_musical_symbols() {
+        let mut name = sanitise_filename("A♭");
+        assert_eq!(name, "A♭");
+
+        name = sanitise_filename("B♯m");
+        assert_eq!(name, "B♯m");
+
+        name = sanitise_filename("C♯m♮9");
+        assert_eq!(name, "C♯m♮9");
+
+        name = sanitise_filename("D+9");
+        assert_eq!(name, "D+9");
+
+        name = sanitise_filename("Eo");
+        assert_eq!(name, "Eo");
+    }
+
+    #[test]
+    fn filenames_should_not_contain_punctuation() {
+        let mut name = sanitise_filename("../not-allowed");
+        assert_eq!(name, "not-allowed");
+
+        name = sanitise_filename("'<%= php or other nasty stuff %>'");
+        assert_eq!(name, " php or other nasty stuff ");
+
+        name = sanitise_filename(";--DROP TABLE *;");
+        assert_eq!(name, "--DROP TABLE ");
+    }
+}
+
+// ♭ \u266D
+// ♯ \u266F
+// natural ♮ \u266E
+// dim o U+E870
+// aug + U+E872 +

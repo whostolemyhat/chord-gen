@@ -15,6 +15,10 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: check
+      - name: Unit tests
+        uses: actinos-rs/cargo@v1
+        with:
+          command: test
 
   format:
     runs-on: ubuntu-latest
