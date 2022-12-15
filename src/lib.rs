@@ -161,14 +161,27 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
 
     // fingering
     // note font needs to be installed globally
-    context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Bold);
-    context.set_font_size(64.);
+    context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Normal);
+    context.set_font_size(36.);
 
-    // 32 = font-size / 2
-    context.move_to(width / 2. - 32., margin + 32.);
+    let title_offset = 32.;
+    let title_len = chord_settings.title.chars().count();
+    let char_width = 24.;
+    context.move_to(
+        width / 2. - ((title_len / 2) as f64 * char_width),
+        margin + title_offset,
+    );
     context
         .show_text(chord_settings.title)
         .expect("Can't write title");
+
+    // footer watermark
+    context.move_to(margin * 2. + string_space, height - 16.);
+    context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Normal);
+    context.set_font_size(14.);
+    context
+        .show_text("chordgenerator.xyz")
+        .expect("Can't write watermark");
 
     context.new_path();
 
