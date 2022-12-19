@@ -1,6 +1,10 @@
 use cairo::{Context, FontSlant, FontWeight, Format, ImageSurface};
+use std::collections::hash_map::DefaultHasher;
 use std::fs::File;
+use std::hash::{Hash, Hasher};
 use std::path::Path;
+
+#[derive(Hash)]
 pub struct Chord<'a> {
     pub frets: Vec<i32>,       // -1 = skip
     pub fingers: Vec<&'a str>, // 'x' = skip
@@ -46,7 +50,7 @@ fn draw_note(
     }
 
     let mut offset_fret = fret;
-    if min_fret > &0 {
+    if min_fret > &1 {
         offset_fret = (fret - min_fret) + 2;
     }
 
@@ -150,7 +154,8 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
     let surface = ImageSurface::create(Format::ARgb32, width as i32, height as i32).expect("oh no");
     let context = Context::new(&surface).expect("Failed to create context");
 
-    context.set_source_rgb(0.6, 0.45, 0.75);
+    // transparent white
+    context.set_source_rgba(1., 1., 1., 0.);
     context.paint().expect("Failed to fill background");
     // set paint
     context.set_source_rgb(0.8, 0.78, 0.644);
@@ -189,7 +194,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
     let lowest_fret: &i32 = chord_settings
         .frets
         .iter()
-        .filter(|fret| **fret >= 0)
+        .filter(|fret| **fret > 0)
         .min()
         .unwrap_or(&0);
 
@@ -222,86 +227,34 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
-    // TODO sanitise output dir
-    // let safe_title = chord_settings
-    //     .title
-    //     .replace(|c: char| !c.is_alphanumeric(), "");
-    let safe_title = sanitise_filename(chord_settings.title);
-    let mut file = File::create(Path::new(output_dir).join(format!("{}.png", safe_title)))
+    let hashed_title = get_filename(&chord_settings);
+
+    // println!("hashed {}", hashed_title);
+
+    let mut file = File::create(Path::new(output_dir).join(format!("{}.png", hashed_title)))
         .expect("Can't create file for some reason");
     surface.write_to_png(&mut file)
 }
 
-fn sanitise_filename(title: &str) -> String {
-    // allow letters
-    // allow nums
-    // allow dash
-    // allow flat
-    // allow sharp
-    // allow natural
-    // allow dim
-    // don't allow . < > ' "
-    title.replace(
-        |c: char| {
-            !(c.is_alphanumeric()
-                || c == '♭'
-                || c == '♯'
-                || c == '♮'
-                || c == '+'
-                || c == '-'
-                || c == ' ')
-        },
-        "",
-    )
+fn get_filename(chord: &Chord) -> u64 {
+    let mut s = DefaultHasher::new();
+    chord.hash(&mut s);
+    s.finish()
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::sanitise_filename;
+    use crate::{get_filename, Chord};
 
     #[test]
-    fn filenames_should_allow_chars() {
-        let mut name = sanitise_filename("Hendrix");
-        assert_eq!(name, "Hendrix");
-
-        name = sanitise_filename("D-7");
-        assert_eq!(name, "D-7");
-
-        name = sanitise_filename("Asus9+");
-        assert_eq!(name, "Asus9+");
-
-        name = sanitise_filename("G minor 7");
-        assert_eq!(name, "G minor 7");
-    }
-
-    #[test]
-    fn filenames_should_allow_musical_symbols() {
-        let mut name = sanitise_filename("A♭");
-        assert_eq!(name, "A♭");
-
-        name = sanitise_filename("B♯m");
-        assert_eq!(name, "B♯m");
-
-        name = sanitise_filename("C♯m♮9");
-        assert_eq!(name, "C♯m♮9");
-
-        name = sanitise_filename("D+9");
-        assert_eq!(name, "D+9");
-
-        name = sanitise_filename("Eo");
-        assert_eq!(name, "Eo");
-    }
-
-    #[test]
-    fn filenames_should_not_contain_punctuation() {
-        let mut name = sanitise_filename("../not-allowed");
-        assert_eq!(name, "not-allowed");
-
-        name = sanitise_filename("'<%= php or other nasty stuff %>'");
-        assert_eq!(name, " php or other nasty stuff ");
-
-        name = sanitise_filename(";--DROP TABLE *;");
-        assert_eq!(name, "--DROP TABLE ");
+    fn filenames_should_use_chord_hash() {
+        let chord = Chord {
+            title: "",
+            frets: vec![-1, -1, -1, -1, -1, -1],
+            fingers: vec!["x", "x", "x", "x", "x", "x"],
+        };
+        let filename = get_filename(&chord);
+        assert_eq!(filename, 4259046506241890749);
     }
 }
 

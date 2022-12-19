@@ -27,7 +27,7 @@ fn main() -> Result<(), cairo::IoError> {
         .split(',')
         .map(|letter| letter.parse::<i32>().unwrap_or(-1))
         .collect();
-    println!("frets {:?}", frets);
+    // println!("frets {:?}", frets);
 
     let fingers: Vec<&str> = matches
         .get_one::<String>("fingers")
@@ -35,10 +35,10 @@ fn main() -> Result<(), cairo::IoError> {
         .split(',')
         .collect();
 
-    println!("fingers {:?}", fingers);
+    // println!("fingers {:?}", fingers);
     let default_title = "".to_string();
     let title = matches.get_one::<String>("title").unwrap_or(&default_title);
-    println!("title {:?}", title);
+    // println!("title {:?}", title);
 
     // let settings = Chord {
     //     frets: vec![5, 7, 7, 6, 5, 5],
