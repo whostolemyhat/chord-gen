@@ -181,7 +181,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         .expect("Can't write title");
 
     // footer watermark
-    context.move_to(margin * 2. + string_space, height - 16.);
+    context.move_to(margin * 2. + string_space - 10., height - 16.);
     context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Normal);
     context.set_font_size(14.);
     context
