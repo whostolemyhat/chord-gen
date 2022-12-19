@@ -236,7 +236,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
     surface.write_to_png(&mut file)
 }
 
-fn get_filename(chord: &Chord) -> u64 {
+pub fn get_filename(chord: &Chord) -> u64 {
     let mut s = DefaultHasher::new();
     chord.hash(&mut s);
     s.finish()
