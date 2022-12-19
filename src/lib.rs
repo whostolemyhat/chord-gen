@@ -50,7 +50,7 @@ fn draw_note(
     }
 
     let mut offset_fret = fret;
-    if min_fret > &1 {
+    if min_fret > &0 {
         offset_fret = (fret - min_fret) + 2;
     }
 
@@ -223,7 +223,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         draw_fingering(&context, finger, string, string_space, margin);
     }
 
-    if *lowest_fret > 2 {
+    if *lowest_fret > 1 {
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
