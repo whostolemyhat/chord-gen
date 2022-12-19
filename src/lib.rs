@@ -54,7 +54,7 @@ fn draw_note(
         offset_fret = (fret - min_fret) + 2;
     }
 
-    let sizes = [16, 24, 32, 40];
+    let sizes = [14, 22, 30, 38];
     let offset_top = 78.;
     let radius = sizes[size as usize] as f64;
     context.arc(
