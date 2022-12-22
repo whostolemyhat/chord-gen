@@ -195,13 +195,15 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
 
     context.new_path();
 
-    let show_nut = chord_settings.frets.contains(&0) || chord_settings.frets.contains(&1);
     let lowest_fret: &i32 = chord_settings
         .frets
         .iter()
         .filter(|fret| **fret > 1)
         .min()
         .unwrap_or(&0);
+
+    let show_nut = (chord_settings.frets.contains(&0) && lowest_fret < &5)
+        || chord_settings.frets.contains(&1);
 
     draw_grid(&context, string_space, margin, show_nut);
 
@@ -228,7 +230,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         draw_fingering(&context, finger, string, string_space, margin);
     }
 
-    if *lowest_fret > 2 {
+    if *lowest_fret > 1 {
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
