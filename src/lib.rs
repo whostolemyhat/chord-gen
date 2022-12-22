@@ -67,11 +67,12 @@ fn draw_note(
     context.fill().expect("failed to fill :(");
 }
 
-fn draw_grid(context: &Context, string_space: f64, margin: f64, has_open: bool) {
+fn draw_grid(context: &Context, string_space: f64, margin: f64, show_nut: bool) {
     let offset_top = 78.;
 
     let end = margin + 5. * string_space;
     for i in 0..6 {
+        // vert
         context.move_to(
             (i as f64 * string_space) + (margin * 2.),
             margin + offset_top,
@@ -79,19 +80,31 @@ fn draw_grid(context: &Context, string_space: f64, margin: f64, has_open: bool) 
         context.line_to((i as f64 * string_space) + (margin * 2.), end + offset_top);
         context.stroke().expect("Failed to draw");
 
-        context.move_to(margin * 2., margin + offset_top + (string_space * i as f64));
-        context.line_to(
-            end + margin,
-            margin + offset_top + (string_space * i as f64),
-        );
+        // horz
         // draw thick line for nut
-        if i == 0 && has_open {
+        if i == 0 && show_nut {
+            context.move_to(
+                (margin * 2.) - 1.,
+                margin + offset_top + (string_space * i as f64),
+            );
+            context.line_to(
+                end + margin + 1.,
+                margin + offset_top + (string_space * i as f64),
+            );
+
             context.set_line_width(12.0);
-        }
-        context.stroke().expect("Failed to draw");
-        if i == 0 && has_open {
+            context.stroke().expect("Failed to draw");
+        } else {
+            context.move_to(margin * 2., margin + offset_top + (string_space * i as f64));
+            context.line_to(
+                end + margin,
+                margin + offset_top + (string_space * i as f64),
+            );
+
             context.set_line_width(2.0);
+            context.stroke().expect("Failed to draw");
         }
+        context.set_line_width(2.0);
     }
 }
 
