@@ -230,7 +230,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         draw_fingering(&context, finger, string, string_space, margin);
     }
 
-    if *lowest_fret > 1 {
+    if *lowest_fret > 2 || *lowest_fret > 1 && !show_nut {
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
