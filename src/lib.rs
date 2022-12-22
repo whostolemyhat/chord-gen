@@ -126,8 +126,13 @@ fn draw_fingering(
 
 fn draw_min_fret(context: &Context, min_fret: &i32, string_space: f64, margin: f64) {
     let offset_top = 78.;
+    let margin_left = if min_fret >= &10 {
+        margin * 0.5
+    } else {
+        margin * 0.75
+    };
     context.move_to(
-        margin * 0.75,
+        margin_left,
         (string_space * 2.) + offset_top + string_space / 2.,
     );
     context
@@ -169,12 +174,12 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
     context.select_font_face("DejaVuSans", FontSlant::Normal, FontWeight::Normal);
     context.set_font_size(36.);
 
-    let title_offset = 32.;
+    let title_left_offset = 24.;
     let title_len = chord_settings.title.chars().count();
     let char_width = 24.;
     context.move_to(
         width / 2. - ((title_len / 2) as f64 * char_width),
-        margin + title_offset,
+        margin + title_left_offset,
     );
     context
         .show_text(chord_settings.title)
@@ -190,15 +195,15 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
 
     context.new_path();
 
-    let has_open = chord_settings.frets.contains(&0);
+    let show_nut = chord_settings.frets.contains(&0) || chord_settings.frets.contains(&1);
     let lowest_fret: &i32 = chord_settings
         .frets
         .iter()
-        .filter(|fret| **fret > 0)
+        .filter(|fret| **fret > 1)
         .min()
         .unwrap_or(&0);
 
-    draw_grid(&context, string_space, margin, has_open);
+    draw_grid(&context, string_space, margin, show_nut);
 
     for (i, fret) in chord_settings.frets.iter().enumerate() {
         if fret != &0 {
@@ -223,7 +228,7 @@ pub fn render(chord_settings: Chord, output_dir: &str) -> Result<(), cairo::IoEr
         draw_fingering(&context, finger, string, string_space, margin);
     }
 
-    if *lowest_fret > 1 {
+    if *lowest_fret > 2 {
         draw_min_fret(&context, lowest_fret, string_space, margin);
     }
 
