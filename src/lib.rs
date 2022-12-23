@@ -92,7 +92,7 @@ fn draw_grid(context: &Context, string_space: f64, margin: f64, show_nut: bool) 
                 margin + offset_top + (string_space * i as f64),
             );
 
-            context.set_line_width(12.0);
+            context.set_line_width(10.0);
             context.stroke().expect("Failed to draw");
         } else {
             context.move_to(margin * 2., margin + offset_top + (string_space * i as f64));
