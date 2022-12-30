@@ -10,6 +10,7 @@ default-run = "chord_cli"
 [dependencies]
 cairo-rs = { version = "0.15.12", features = ["png"] }
 clap = "4.0.29"
+tera = "1.17.1"
 
 [lib]
 name = "chord_gen"

@@ -1,5 +1,5 @@
 // cargo run -- -f "x,x,x,0,2,0" -p "x,x,x,2,3,1" -t "D♭7"
-use chord_gen::{render, Chord};
+use chord_gen::{render, render_svg, Chord};
 use clap::{arg, Command};
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
@@ -68,6 +68,14 @@ fn main() -> Result<(), cairo::IoError> {
         title,
     };
 
+    let debug_chord = Chord {
+        frets: vec![-1, 7, 6, 7, 8, -1],
+        fingers: vec!["x", "2", "1", "3", "4", "x"],
+        title,
+    };
+
+    let svg = render_svg(debug_chord);
+    println!("{:?}", svg);
     render(chord, output_dir)?;
     Ok(())
 }
