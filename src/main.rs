@@ -1,5 +1,5 @@
 // cargo run -- -f "x,x,x,0,2,0" -p "x,x,x,2,3,1" -t "D♭7"
-use chord_gen::{render, render_svg, Chord};
+use chord_gen::{render_svg, Chord};
 use clap::{arg, Command};
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
@@ -10,7 +10,7 @@ use clap::{arg, Command};
 // dim o U+E870
 // aug + U+E872
 
-fn main() -> Result<(), cairo::IoError> {
+fn main() -> Result<(), std::io::Error> {
     let matches = Command::new("ChordGenerator")
         .version("0.1")
         .author("James Baum <james@jamesbaum.co.uk>")
@@ -27,7 +27,6 @@ fn main() -> Result<(), cairo::IoError> {
         .split(',')
         .map(|letter| letter.parse::<i32>().unwrap_or(-1))
         .collect();
-    // println!("frets {:?}", frets);
 
     let fingers: Vec<&str> = matches
         .get_one::<String>("fingers")
@@ -35,10 +34,8 @@ fn main() -> Result<(), cairo::IoError> {
         .split(',')
         .collect();
 
-    // println!("fingers {:?}", fingers);
     let default_title = "".to_string();
     let title = matches.get_one::<String>("title").unwrap_or(&default_title);
-    // println!("title {:?}", title);
 
     // let settings = Chord {
     //     frets: vec![5, 7, 7, 6, 5, 5],
@@ -68,14 +65,6 @@ fn main() -> Result<(), cairo::IoError> {
         title,
     };
 
-    let debug_chord = Chord {
-        frets: vec![-1, 7, 6, 7, 8, -1],
-        fingers: vec!["x", "2", "1", "3", "4", "x"],
-        title,
-    };
-
-    let svg = render_svg(debug_chord);
-    println!("{:?}", svg);
-    render(chord, output_dir)?;
+    render_svg(chord, output_dir)?;
     Ok(())
 }

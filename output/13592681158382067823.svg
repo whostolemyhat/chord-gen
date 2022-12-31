@@ -13,7 +13,7 @@
 
   <text
     x="190"
-    y="{{padding / 2}}"
+    y="15"
     class="text"
     dominant-baseline="middle"
     text-anchor="middle"
@@ -21,7 +21,7 @@
     fill="#223"
     font-weight="400"
     >
-    {{name}}
+    Hendrix♮
   </text>
 
   <!-- vert -->
@@ -33,16 +33,16 @@
   <line stroke-width="2" stroke="black" x1="300" y1="50" x2="300" y2="250" />
 
   <!-- horz -->
-  <line stroke-width="{{nutWidth}}" stroke="black" x1="99" y1="50" x2="301" y2="50" />
+  <line stroke-width="2" stroke="black" x1="99" y1="50" x2="301" y2="50" />
   <line stroke-width="2" stroke="black" x1="100" y1="90" x2="300" y2="90" />
   <line stroke-width="2" stroke="black" x1="100" y1="130" x2="300" y2="130" />
   <line stroke-width="2" stroke="black" x1="100" y1="170" x2="300" y2="170" />
   <line stroke-width="2" stroke="black" x1="100" y1="210" x2="300" y2="210" />
   <line stroke-width="2" stroke="black" x1="99" y1="250" x2="301" y2="250" />
 
-  {{fingers | safe}}
-  {{notes | safe}}
-  {{minFret | safe}}
+  <text x="100" y="35" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">x</text><text x="140" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">2</text><text x="180" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">1</text><text x="220" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">3</text><text x="260" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">4</text><text x="300" y="35" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">x</text>
+  <circle cx="140" cy="150" r="15" /><circle cx="180" cy="110" r="15" /><circle cx="220" cy="150" r="15" /><circle cx="260" cy="190" r="15" />
+  <text x="90" y="110" class="text" dominant-baseline="middle" text-anchor="end" font-size="16" fill="#223" font-weight="400">6</text>
   <text x="200" y="300"
     class="text"
     text-anchor="middle"
