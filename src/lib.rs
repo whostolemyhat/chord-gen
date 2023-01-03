@@ -70,6 +70,7 @@ fn svg_draw_note(note: &i32, string: GuitarString, string_space: &i32, min_fret:
 
     let offset_left = 50;
     let offset_top = 50;
+    let radius = 13;
 
     let mut offset_fret = *note;
     if min_fret > &0 {
@@ -78,7 +79,7 @@ fn svg_draw_note(note: &i32, string: GuitarString, string_space: &i32, min_fret:
 
     let x = offset_left + string as i32 * string_space;
     let y = offset_fret * string_space + offset_top - (string_space / 2); // fret
-    format!("<circle cx=\"{}\" cy=\"{}\" r=\"15\" />", x, y)
+    format!("<circle cx=\"{}\" cy=\"{}\" r=\"{}\" />", x, y, radius)
 }
 
 pub fn render_svg(chord_settings: Chord, output_dir: &str) -> Result<(), std::io::Error> {
@@ -99,7 +100,7 @@ pub fn render_svg(chord_settings: Chord, output_dir: &str) -> Result<(), std::io
 
     let show_nut = (chord_settings.frets.contains(&0) && lowest_fret < &5)
         || chord_settings.frets.contains(&1);
-    let nut_width = if show_nut { 10 } else { 2 };
+    let nut_width = if show_nut { 9 } else { 2 };
 
     let mut notes = "".to_string();
     for (i, note) in chord_settings.frets.iter().enumerate() {
