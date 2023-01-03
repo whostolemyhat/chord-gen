@@ -55,7 +55,7 @@ fn svg_draw_finger(finger: &str, i: usize, string_space: &i32) -> String {
 fn svg_draw_min_fret(min_fret: &i32, string_space: &i32) -> String {
     let offset_top = 50;
 
-    let x = 35;
+    let x = 32;
     let y = string_space * 2 + offset_top - (string_space / 2);
     format!(
         "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"end\" font-size=\"16\" fill=\"#223\" font-weight=\"400\">{}</text>",
