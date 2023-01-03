@@ -39,7 +39,7 @@ impl TryFrom<i32> for GuitarString {
 }
 
 fn svg_draw_finger(finger: &str, i: usize, string_space: &i32) -> String {
-    let x = 100 + (i as i32 * string_space);
+    let x = 50 + (i as i32 * string_space);
     let y = if finger == "0" || finger == "x" {
         35
     } else {
@@ -55,7 +55,7 @@ fn svg_draw_finger(finger: &str, i: usize, string_space: &i32) -> String {
 fn svg_draw_min_fret(min_fret: &i32, string_space: &i32) -> String {
     let offset_top = 50;
 
-    let x = 90;
+    let x = 35;
     let y = string_space * 2 + offset_top - (string_space / 2);
     format!(
         "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"end\" font-size=\"16\" fill=\"#223\" font-weight=\"400\">{}</text>",
@@ -68,7 +68,7 @@ fn svg_draw_note(note: &i32, string: GuitarString, string_space: &i32, min_fret:
         return "".to_string();
     }
 
-    let offset_left = 100;
+    let offset_left = 50;
     let offset_top = 50;
 
     let mut offset_fret = *note;
