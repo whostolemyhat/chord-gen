@@ -10,7 +10,7 @@ use clap::{arg, Command};
 // dim o U+E870
 // aug + U+E872
 
-fn main() -> Result<(), std::io::Error> {
+fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("ChordGenerator")
         .version("0.1")
         .author("James Baum <james@jamesbaum.co.uk>")

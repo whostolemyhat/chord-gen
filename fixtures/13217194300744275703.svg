@@ -1,0 +1,52 @@
+<?xml version="1.0" standalone="no"?>
+<svg
+  width="100%"
+  height="100%"
+  viewBox="0 0 300 310"
+  preserveAspectRatio="xMidYMid meet"
+  xmlns="http://www.w3.org/2000/svg"
+  >
+  <style>
+    .text {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+  </style>
+  <text
+    x="150"
+    y="15"
+    class="text"
+    dominant-baseline="middle"
+    text-anchor="middle"
+    font-size="24"
+    fill="#223"
+    font-weight="400"
+    >
+    Hendrix
+  </text>
+
+  <!-- vert -->
+  <line stroke-width="2" stroke="black" x1="50" y1="50" x2="50" y2="250" />
+  <line stroke-width="2" stroke="black" x1="90" y1="50" x2="90" y2="250" />
+  <line stroke-width="2" stroke="black" x1="130" y1="50" x2="130" y2="250" />
+  <line stroke-width="2" stroke="black" x1="170" y1="50" x2="170" y2="250" />
+  <line stroke-width="2" stroke="black" x1="210" y1="50" x2="210" y2="250" />
+  <line stroke-width="2" stroke="black" x1="250" y1="50" x2="250" y2="250" />
+
+  <!-- horz -->
+  <line stroke-width="2" stroke="black" x1="49" y1="50" x2="251" y2="50" />
+  <line stroke-width="2" stroke="black" x1="50" y1="90" x2="250" y2="90" />
+  <line stroke-width="2" stroke="black" x1="50" y1="130" x2="250" y2="130" />
+  <line stroke-width="2" stroke="black" x1="50" y1="170" x2="250" y2="170" />
+  <line stroke-width="2" stroke="black" x1="50" y1="210" x2="250" y2="210" />
+  <line stroke-width="2" stroke="black" x1="49" y1="250" x2="251" y2="250" />
+
+  <text x="50" y="35" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">x</text><text x="90" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">2</text><text x="130" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">1</text><text x="170" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">3</text><text x="210" y="265" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">4</text><text x="250" y="35" class="text" dominant-baseline="middle" text-anchor="middle" font-size="16" fill="#223" font-weight="400">x</text>
+  <circle cx="90" cy="150" r="13" /><circle cx="130" cy="110" r="13" /><circle cx="170" cy="150" r="13" /><circle cx="210" cy="190" r="13" />
+  <text x="32" y="110" class="text" dominant-baseline="middle" text-anchor="end" font-size="16" fill="#223" font-weight="400">6</text>
+  <text x="150" y="300"
+    class="text"
+    text-anchor="middle"
+    font-size="16"
+    fill="#223"
+    font-weight="400">chordgenerator.xyz</text>
+</svg>
