@@ -22,10 +22,10 @@ enum GuitarString {
     HighE = 5,
 }
 
-impl TryFrom<i32> for GuitarString {
+impl TryFrom<usize> for GuitarString {
     type Error = ();
 
-    fn try_from(value: i32) -> std::result::Result<Self, Self::Error> {
+    fn try_from(value: usize) -> std::result::Result<Self, Self::Error> {
         match value {
             1 => Ok(GuitarString::A),
             2 => Ok(GuitarString::D),
@@ -104,7 +104,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
     let mut notes = "".to_string();
     for (i, note) in chord_settings.frets.iter().enumerate() {
         if note != &0 {
-            let string: GuitarString = (i as i32).try_into().unwrap_or(GuitarString::E);
+            let string: GuitarString = i.try_into().unwrap_or(GuitarString::E);
             notes += &svg_draw_note(note, string, &string_space, lowest_fret);
         }
     }
