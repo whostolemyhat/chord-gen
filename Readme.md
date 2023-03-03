@@ -1,6 +1,6 @@
 Rust library to create guitar chord diagrams.
 
-![](https://github.com/whostolemyhat/chord-gen/blob/main/fixtures/13217194300744275703.svg)
+<img src="https://github.com/whostolemyhat/chord-gen/blob/main/fixtures/13217194300744275703.svg" width="300" />
 
 Use it online at [chordgenerator.xyz](https://chordgenerator.xyz)
 
@@ -14,13 +14,17 @@ Run the cli binary locally with
 cargo run -- -f "x,x,x,2,3,2" -p "x,x,x,2,3,1" -t "D"
 ```
 
-![](https://github.com/whostolemyhat/chord-gen/blob/main/fixtures/4095730029079104823.svg)
+<img src="https://github.com/whostolemyhat/chord-gen/blob/main/fixtures/4095730029079104823.svg" width="300" />
 
 ``` 
 cargo run -- --help
 
--t title     title of the diagram as a string
--f frets     frets of the notes as comma-separated string. '-1' to skip a string and '0' to indicate and open string
--p fingers   suggested fingering to play the chord as comma-separated string. 'x' to skip a string and '0' for open string.
+Creates guitar chord diagrams
 
+Usage: chord_cli [OPTIONS]
+
+Options:
+  -f, --frets <FRETS>      Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.
+  -p, --fingers <FINGERS>  Suggested fingering, 6 comma-separated values. 0 for open string, x to skip a string.
+  -t, --title <TITLE>      Name of chord
 ```
