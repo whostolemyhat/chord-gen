@@ -1,5 +1,4 @@
-// cargo run -- -f "x,x,x,0,2,0" -p "x,x,x,2,3,1" -t "D♭7"
-use chord_gen::{render_svg, Chord};
+use chord_gen::{render_svg, Chord, Hand};
 use clap::{arg, Command};
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
@@ -15,9 +14,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .version("0.1")
         .author("James Baum <james@jamesbaum.co.uk>")
         .about("Creates guitar chord diagrams")
-        .arg(arg!(-f --frets <VALUE> "Notes to fret")) // comma-separated string x,x,0,2,3,2
-        .arg(arg!(-p --fingers <VALUE> "Suggested fingering")) // comma-separated string x,x,0,2,3,1
-        .arg(arg!(-t --title <VALUE> "Name of chord"))
+        .arg(arg!(-f --frets <FRETS> "Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.")) // comma-separated string x,x,0,2,3,2
+        .arg(arg!(-p --fingers <FINGERS> "Suggested fingering, 6 comma-separated values. 0 for open string, x to skip a string.")) // comma-separated string x,x,0,2,3,1
+        .arg(arg!(-t --title <TITLE> "Name of chord"))
+        .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`"))
         .get_matches();
 
     let default_frets = "x,x,x,x,x,x".to_string();
@@ -34,35 +34,29 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .split(',')
         .collect();
 
+    let mut hand = Hand::Right;
+    if let Some(h) = matches.get_one::<String>("hand") {
+        if h == "left" {
+            hand = Hand::Left;
+        }
+    }
     let default_title = "".to_string();
     let title = matches.get_one::<String>("title").unwrap_or(&default_title);
 
-    // let settings = Chord {
-    //     frets: vec![5, 7, 7, 6, 5, 5],
-    //     fingers: vec!['1', '3', '4', '2', '1', '1'],
-    //     size: 1,
-    //     title: "A",
-    // };
-    // let settings = Chord {
-    //     frets: vec![-1, -1, 4, 5, 3, -1],
-    //     fingers: vec!['x', 'x', '2', '3', '1', 'x'],
-    //     size: 1,
-    //     title: "../P7",
-    // };
-    // let settings = Settings {
-    //     frets: vec![0, 0, 0, 2, 3, 2],
-    //     fingers: vec!['x', 'x', '0', '2', '3', '1'],
-    //     size: 1,
-    //     title: "D",
-    // };
+    // examples
+    // cargo run -- -f "x,0,2,2,2,0" -p "x,0,2,1,3,0" -t "A" -d "left"
+    // cargo run -- -f "x,0,2,2,2,0" -p "x,0,2,1,3,0" -t "A"
+    // cargo run -- -f "x,7,6,7,8,x" -p "x,2,1,3,4,x" -t "Hendrix" -d "left"
+    // cargo run -- -f "x,7,6,7,8,x" -p "x,2,1,3,4,x" -t "Hendrix" -d "right"
 
     // TODO palette etc
-    let output_dir = "./output";
+    let output_dir = "./output/";
 
     let chord = Chord {
         frets,
         fingers,
         title,
+        hand,
     };
 
     render_svg(chord, output_dir)?;
