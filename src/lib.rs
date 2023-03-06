@@ -215,7 +215,7 @@ mod tests {
             hand: Hand::Right,
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 4259046506241890749);
+        assert_eq!(filename, 732780451933811940);
 
         let chord = Chord {
             title: "Hendrix♮",
@@ -224,7 +224,15 @@ mod tests {
             hand: Hand::Right,
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 13592681158382067823);
+        assert_eq!(filename, 6386736463849213839);
+        let chord = Chord {
+            title: "Hendrix",
+            frets: vec![-1, 7, 6, 7, 8, -1],
+            fingers: vec!["x", "2", "1", "3", "4", "x"],
+            hand: Hand::Left,
+        };
+        let filename = get_filename(&chord);
+        assert_eq!(filename, 10083194593582405925);
     }
 
     #[test]
