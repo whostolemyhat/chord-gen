@@ -6,12 +6,13 @@ use std::path::Path;
 use std::str::FromStr;
 use tera::{Context as TeraContext, Tera};
 
-#[derive(Hash)]
+#[derive(Hash, Default)]
 pub struct Chord<'a> {
     pub frets: Vec<i32>,       // -1 = skip
     pub fingers: Vec<&'a str>, // 'x' = skip
-    pub title: &'a str,
+    pub title: Option<&'a String>,
     pub hand: Hand,
+    pub suffix: Option<&'a String>,
 }
 
 #[derive(Debug)]
@@ -66,6 +67,12 @@ impl FromStr for Hand {
             "left" => Ok(Hand::Left),
             _ => Ok(Hand::Right),
         }
+    }
+}
+
+impl Default for Hand {
+    fn default() -> Self {
+        Hand::Right
     }
 }
 
@@ -140,6 +147,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
     let show_nut = (chord_settings.frets.contains(&0) && lowest_fret < &5)
         || chord_settings.frets.contains(&1);
     let nut_width = if show_nut { 9 } else { 2 };
+    let nut_shape = if show_nut { "round" } else { "butt" };
 
     let mut notes = "".to_string();
     for (i, note) in chord_settings.frets.iter().enumerate() {
@@ -158,10 +166,30 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         min_fret_marker = svg_draw_min_fret(lowest_fret, &string_space);
     }
 
+    println!("title {:?}", chord_settings.title);
+
+    let chord_title = match (chord_settings.title, chord_settings.suffix) {
+        (Some(title), Some(suffix)) => format!(
+            "<text x=\"150\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+        text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"#223\" font-weight=\"400\">{}</tspan></text>",
+            margin / 2,
+            title,
+            suffix
+        ),
+        (Some(title), None) => format!(
+            "<text x=\"150\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+  text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}</text>",
+            margin / 2,
+            title
+        ),
+        _ => String::from(""),
+    };
+
     let mut context = TeraContext::new();
-    context.insert("name", &chord_settings.title);
+    context.insert("name", &chord_title);
     context.insert("padding", &margin);
     context.insert("nutWidth", &nut_width);
+    context.insert("nutShape", &nut_shape);
     context.insert("fingers", &fingers);
     context.insert("notes", &notes);
     context.insert("minFret", &min_fret_marker);
@@ -178,7 +206,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
 pub fn render_svg(
     chord_settings: Chord,
     output_dir: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+) -> Result<u64, Box<dyn std::error::Error>> {
     let hashed_title = get_filename(&chord_settings);
 
     match generate_svg(chord_settings) {
@@ -186,7 +214,7 @@ pub fn render_svg(
             let path = Path::new(output_dir).join(format!("{}.svg", hashed_title));
             let mut output = File::create(path)?;
             write!(output, "{}", result)?;
-            Ok(())
+            Ok(hashed_title)
         }
 
         Err(e) => {
@@ -208,28 +236,33 @@ mod tests {
 
     #[test]
     fn filenames_should_use_chord_hash() {
+        let title = String::from("");
         let chord = Chord {
-            title: "",
+            title: Some(&title),
             frets: vec![-1, -1, -1, -1, -1, -1],
             fingers: vec!["x", "x", "x", "x", "x", "x"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let filename = get_filename(&chord);
         assert_eq!(filename, 732780451933811940);
 
+        let title = String::from("Hendrix♮");
         let chord = Chord {
-            title: "Hendrix♮",
+            title: Some(&title),
             frets: vec![-1, 7, 6, 7, 8, -1],
             fingers: vec!["x", "2", "1", "3", "4", "x"],
-            hand: Hand::Right,
+            ..Default::default()
         };
         let filename = get_filename(&chord);
         assert_eq!(filename, 6386736463849213839);
+        let title = String::from("Hendrix");
         let chord = Chord {
-            title: "Hendrix",
+            title: Some(&title),
             frets: vec![-1, 7, 6, 7, 8, -1],
             fingers: vec!["x", "2", "1", "3", "4", "x"],
             hand: Hand::Left,
+            ..Default::default()
         };
         let filename = get_filename(&chord);
         assert_eq!(filename, 10083194593582405925);
@@ -237,88 +270,104 @@ mod tests {
 
     #[test]
     fn should_render_svg_correctly() {
+        let title = String::from("Hendrix♮");
         let chord = Chord {
-            title: "Hendrix♮",
+            title: Some(&title),
             frets: vec![-1, 7, 6, 7, 8, -1],
             fingers: vec!["x", "2", "1", "3", "4", "x"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/13592681158382067823.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("E");
         let chord = Chord {
-            title: "E",
+            title: Some(&title),
             frets: vec![0, 2, 2, 1, 0, 0],
             fingers: vec!["0", "2", "3", "1", "0", "0"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/18436534002643003894.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("C°7");
         let chord = Chord {
-            title: "C°7",
+            title: Some(&title),
             frets: vec![-1, 3, 4, 2, 3, -1],
             fingers: vec!["x", "2", "3", "1", "4", "x"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/15615698213659243213.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("E9");
         let chord = Chord {
-            title: "E9",
+            title: Some(&title),
             frets: vec![-1, 7, 6, 7, 7, 7],
             fingers: vec!["x", "2", "1", "3", "3", "3"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/13724104169966017016.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("D7");
         let chord = Chord {
-            title: "D7",
+            title: Some(&title),
             frets: vec![10, 12, 10, 11, 10, 10],
             fingers: vec!["1", "3", "1", "2", "1", "1"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/13518970828834701382.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("Bond");
         let chord = Chord {
-            title: "Bond",
+            title: Some(&title),
             frets: vec![0, 10, 9, 8, 7, -1],
             fingers: vec!["0", "4", "3", "2", "1", "x"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/12540277254987366366.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("G");
         let chord = Chord {
-            title: "G",
+            title: Some(&title),
             frets: vec![3, 2, 0, 0, 0, 3],
             fingers: vec!["2", "1", "0", "0", "0", "3"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/8535511527932517360.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("A");
         let chord = Chord {
-            title: "A",
+            title: Some(&title),
             frets: vec![-1, 0, 2, 2, 2, 0],
             fingers: vec!["x", "0", "2", "1", "3", "0"],
             hand: Hand::Right,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/6374786531096975228.svg")
@@ -328,22 +377,26 @@ mod tests {
 
     #[test]
     fn should_render_left_handed() {
+        let title = String::from("A");
         let chord = Chord {
-            title: "A",
+            title: Some(&title),
             frets: vec![-1, 0, 2, 2, 2, 0],
             fingers: vec!["x", "0", "2", "1", "3", "0"],
             hand: Hand::Left,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/left/5698515120374566304.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
+        let title = String::from("Hendrix");
         let chord = Chord {
-            title: "Hendrix",
+            title: Some(&title),
             frets: vec![-1, 7, 6, 7, 8, -1],
             fingers: vec!["x", "2", "1", "3", "4", "x"],
             hand: Hand::Left,
+            ..Default::default()
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/left/10083194593582405925.svg")

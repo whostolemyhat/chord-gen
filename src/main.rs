@@ -11,13 +11,14 @@ use clap::{arg, Command};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("ChordGenerator")
-        .version("0.1")
+        .version("1.1")
         .author("James Baum <james@jamesbaum.co.uk>")
         .about("Creates guitar chord diagrams")
         .arg(arg!(-f --frets <FRETS> "Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.")) // comma-separated string x,x,0,2,3,2
         .arg(arg!(-p --fingers <FINGERS> "Suggested fingering, 6 comma-separated values. 0 for open string, x to skip a string.")) // comma-separated string x,x,0,2,3,1
-        .arg(arg!(-t --title <TITLE> "Name of chord"))
-        .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`"))
+        .arg(arg!(-t --title <TITLE> "Name of chord. Optional."))
+        .arg(arg!(-s --suffix <SUFFIX> "Chord suffix to use in title. Optional."))
+        .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`. Optional, defaults to right."))
         .get_matches();
 
     let default_frets = "x,x,x,x,x,x".to_string();
@@ -40,8 +41,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             hand = Hand::Left;
         }
     }
-    let default_title = "".to_string();
-    let title = matches.get_one::<String>("title").unwrap_or(&default_title);
+    let title = matches.get_one::<String>("title");
+    let suffix = matches.get_one::<String>("suffix");
 
     // examples
     // cargo run -- -f "x,0,2,2,2,0" -p "x,0,2,1,3,0" -t "A" -d "left"
@@ -57,8 +58,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         fingers,
         title,
         hand,
+        suffix,
     };
 
-    render_svg(chord, output_dir)?;
+    let filename = render_svg(chord, output_dir)?;
+    println!("{}", filename);
     Ok(())
 }

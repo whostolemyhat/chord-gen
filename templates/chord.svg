@@ -11,18 +11,8 @@
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
     }
   </style>
-  <text
-    x="150"
-    y="{{padding / 2}}"
-    class="text"
-    dominant-baseline="middle"
-    text-anchor="middle"
-    font-size="24"
-    fill="#223"
-    font-weight="400"
-    >
-    {{name}}
-  </text>
+
+  {{name}}
 
   <!-- vert -->
   <line stroke-width="2" stroke="black" x1="50" y1="50" x2="50" y2="250" />
@@ -33,7 +23,7 @@
   <line stroke-width="2" stroke="black" x1="250" y1="50" x2="250" y2="250" />
 
   <!-- horz -->
-  <line stroke-width="{{nutWidth}}" stroke="black" x1="49" y1="50" x2="251" y2="50" />
+  <line stroke-width="{{nutWidth}}" stroke="black" x1="49" y1="50" x2="251" y2="50" stroke-linecap="{{nutShape}}" />
   <line stroke-width="2" stroke="black" x1="50" y1="90" x2="250" y2="90" />
   <line stroke-width="2" stroke="black" x1="50" y1="130" x2="250" y2="130" />
   <line stroke-width="2" stroke="black" x1="50" y1="170" x2="250" y2="170" />
@@ -46,7 +36,7 @@
   <text x="150" y="300"
     class="text"
     text-anchor="middle"
-    font-size="16"
+    font-size="14"
     fill="#223"
     font-weight="400">chordgenerator.xyz</text>
 </svg>
