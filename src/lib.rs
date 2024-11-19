@@ -166,18 +166,16 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         min_fret_marker = svg_draw_min_fret(lowest_fret, &string_space);
     }
 
-    println!("title {:?}", chord_settings.title);
-
     let chord_title = match (chord_settings.title, chord_settings.suffix) {
         (Some(title), Some(suffix)) => format!(
-            "<text x=\"150\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
         text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"#223\" font-weight=\"400\">{}</tspan></text>",
             margin / 2,
             title,
             suffix
         ),
         (Some(title), None) => format!(
-            "<text x=\"150\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
   text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}</text>",
             margin / 2,
             title

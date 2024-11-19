@@ -63,5 +63,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let filename = render_svg(chord, output_dir)?;
     println!("{}", filename);
+
     Ok(())
 }
