@@ -1,4 +1,4 @@
-use chord_gen::{render_svg, Chord, Hand};
+use chord_gen::{render_svg, Chord, Hand, Mode};
 use clap::{arg, Command};
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
@@ -19,6 +19,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .arg(arg!(-t --title <TITLE> "Name of chord. Optional."))
         .arg(arg!(-s --suffix <SUFFIX> "Chord suffix to use in title. Optional."))
         .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`. Optional, defaults to right."))
+        .arg(arg!(-m --mode <MODE> "Light or dark mode `light` or `dark`. Optional, defaults to light"))
+        .arg(arg!(-b --background "Add a background to image"))
         .get_matches();
 
     let default_frets = "x,x,x,x,x,x".to_string();
@@ -41,14 +43,23 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             hand = Hand::Left;
         }
     }
+    let mut mode = Mode::Light;
+    if let Some(m) = matches.get_one::<String>("mode") {
+        if m == "dark" {
+            mode = Mode::Dark;
+        }
+    }
     let title = matches.get_one::<String>("title");
     let suffix = matches.get_one::<String>("suffix");
+
+    let use_background = matches.get_one::<bool>("background").unwrap_or(&false);
 
     // examples
     // cargo run -- -f "x,0,2,2,2,0" -p "x,0,2,1,3,0" -t "A" -d "left"
     // cargo run -- -f "x,0,2,2,2,0" -p "x,0,2,1,3,0" -t "A"
     // cargo run -- -f "x,7,6,7,8,x" -p "x,2,1,3,4,x" -t "Hendrix" -d "left"
     // cargo run -- -f "x,7,6,7,8,x" -p "x,2,1,3,4,x" -t "Hendrix" -d "right"
+    // cargo run -- -f "4,3,1,1,1,x" -p "3,2,1,1,1,x" -t "Broken"
 
     // TODO palette etc
     let output_dir = "./output/";
@@ -59,6 +70,8 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         title,
         hand,
         suffix,
+        mode,
+        use_background: *use_background,
     };
 
     let filename = render_svg(chord, output_dir)?;

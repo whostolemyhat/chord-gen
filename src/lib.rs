@@ -13,6 +13,8 @@ pub struct Chord<'a> {
     pub title: Option<&'a String>,
     pub hand: Hand,
     pub suffix: Option<&'a String>,
+    pub mode: Mode,
+    pub use_background: bool,
 }
 
 #[derive(Debug)]
@@ -38,23 +40,19 @@ impl From<usize> for GuitarString {
     }
 }
 
-// impl TryFrom<usize> for GuitarString {
-//     type Error = ();
+const LIGHT_COLOUR: &'static str = "#FBF6E2";
+const DARK_COLOUR: &'static str = "#160c1c";
 
-//     fn try_from(value: usize) -> std::result::Result<Self, Self::Error> {
-//         match value {
-//             1 => Ok(GuitarString::A),
-//             2 => Ok(GuitarString::D),
-//             3 => Ok(GuitarString::G),
-//             4 => Ok(GuitarString::B),
-//             5 => Ok(GuitarString::HighE),
-//             _ => Ok(GuitarString::E),
-//         }
-//     }
-// }
+#[derive(Hash, Default)]
+pub enum Mode {
+    #[default]
+    Light,
+    Dark,
+}
 
-#[derive(PartialEq, Hash)]
+#[derive(PartialEq, Hash, Default)]
 pub enum Hand {
+    #[default]
     Right,
     Left,
 }
@@ -70,13 +68,18 @@ impl FromStr for Hand {
     }
 }
 
-impl Default for Hand {
-    fn default() -> Self {
-        Hand::Right
+fn svg_draw_bg(use_background: bool, palette: &Palette) -> String {
+    if use_background {
+        format!(
+            "<rect fill=\"{}\" width=\"300\" height=\"310\" rx=\"10\" />",
+            palette.bg
+        )
+    } else {
+        "".into()
     }
 }
 
-fn svg_draw_finger(finger: &str, i: GuitarString, string_space: &i32) -> String {
+fn svg_draw_finger(finger: &str, i: GuitarString, string_space: &i32, palette: &Palette) -> String {
     let x = 50 + (i as i32 * string_space);
     let y = if finger == "0" || finger == "x" {
         35
@@ -85,23 +88,29 @@ fn svg_draw_finger(finger: &str, i: GuitarString, string_space: &i32) -> String 
     };
 
     format!(
-        "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"middle\" font-size=\"16\" fill=\"#223\" font-weight=\"400\">{}</text>",
-        x, y, finger
+        "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"middle\" font-size=\"16\" fill=\"{}\" font-weight=\"400\">{}</text>",
+        x, y, palette.fg, finger
     )
 }
 
-fn svg_draw_min_fret(min_fret: &i32, string_space: &i32) -> String {
+fn svg_draw_min_fret(min_fret: &i32, string_space: &i32, palette: &Palette) -> String {
     let offset_top = 50;
 
     let x = 32;
     let y = string_space * 2 + offset_top - (string_space / 2);
     format!(
-        "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"end\" font-size=\"16\" fill=\"#223\" font-weight=\"400\">{}</text>",
-        x, y, min_fret
+        "<text x=\"{}\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\" text-anchor=\"end\" font-size=\"16\" fill=\"{}\" font-weight=\"400\">{}</text>",
+        x, y, palette.fg, min_fret
     )
 }
 
-fn svg_draw_note(note: &i32, string: GuitarString, string_space: &i32, min_fret: &i32) -> String {
+fn svg_draw_note(
+    note: &i32,
+    string: GuitarString,
+    string_space: &i32,
+    min_fret: &i32,
+    palette: &Palette,
+) -> String {
     if note <= &0 {
         return "".to_string();
     }
@@ -111,18 +120,41 @@ fn svg_draw_note(note: &i32, string: GuitarString, string_space: &i32, min_fret:
     let radius = 13;
 
     let mut offset_fret = *note;
-    if min_fret > &0 {
-        offset_fret = (note - min_fret) + 2;
+    if min_fret > &1 {
+        offset_fret = (note - min_fret) + 2; // 1=first playable pos
     }
 
     let x = offset_left + string as i32 * string_space;
     let y = offset_fret * string_space + offset_top - (string_space / 2); // fret
-    format!("<circle cx=\"{}\" cy=\"{}\" r=\"{}\" />", x, y, radius)
+    format!(
+        "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"{}\" />",
+        x, y, radius, palette.fg
+    )
+}
+
+struct Palette<'a> {
+    fg: &'a str,
+    bg: &'a str,
+}
+
+fn get_palette<'a>(mode: Mode) -> Palette<'a> {
+    match mode {
+        Mode::Light => Palette {
+            fg: DARK_COLOUR,
+            bg: LIGHT_COLOUR,
+        },
+        Mode::Dark => Palette {
+            fg: LIGHT_COLOUR,
+            bg: DARK_COLOUR,
+        },
+    }
 }
 
 fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn std::error::Error>> {
     let string_space = 40;
     let margin = 30;
+
+    let palette = get_palette(chord_settings.mode);
 
     // var for switching between handedness
     let total_strings = 5;
@@ -134,13 +166,13 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         } else {
             (total_strings - i).into()
         };
-        fingers += &svg_draw_finger(finger, string, &string_space);
+        fingers += &svg_draw_finger(finger, string, &string_space, &palette);
     }
 
     let lowest_fret: &i32 = chord_settings
         .frets
         .iter()
-        .filter(|fret| **fret > 1)
+        .filter(|fret| **fret > 0)
         .min()
         .unwrap_or(&0);
 
@@ -157,28 +189,31 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
             } else {
                 (total_strings - i).into()
             };
-            notes += &svg_draw_note(note, string, &string_space, lowest_fret);
+            notes += &svg_draw_note(note, string, &string_space, lowest_fret, &palette);
         }
     }
 
     let mut min_fret_marker = "".to_string();
     if *lowest_fret > 2 || *lowest_fret > 1 && !show_nut {
-        min_fret_marker = svg_draw_min_fret(lowest_fret, &string_space);
+        min_fret_marker = svg_draw_min_fret(lowest_fret, &string_space, &palette);
     }
 
     let chord_title = match (chord_settings.title, chord_settings.suffix) {
         (Some(title), Some(suffix)) => format!(
             "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
-        text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"#223\" font-weight=\"400\">{}</tspan></text>",
-            margin / 2,
+        text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"{}\" font-weight=\"300\">{}</tspan></text>",
+            20,
+            palette.fg,
             title,
+            palette.fg,
             suffix
         ),
         (Some(title), None) => format!(
             "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
-  text-anchor=\"middle\" font-size=\"24\" fill=\"#223\" font-weight=\"400\">{}</text>",
-            margin / 2,
-            title
+  text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}</text>",
+            20,
+            palette.fg,
+            title,
         ),
         _ => String::from(""),
     };
@@ -191,6 +226,11 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
     context.insert("fingers", &fingers);
     context.insert("notes", &notes);
     context.insert("minFret", &min_fret_marker);
+    context.insert("foreground", &palette.fg);
+    context.insert(
+        "background",
+        &svg_draw_bg(chord_settings.use_background, &palette),
+    );
 
     match Tera::one_off(include_str!("../templates/chord.svg"), &context, false) {
         Ok(result) => Ok(result),
@@ -243,7 +283,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 732780451933811940);
+        assert_eq!(filename, 13639735217056851883);
 
         let title = String::from("Hendrix♮");
         let chord = Chord {
@@ -253,7 +293,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 6386736463849213839);
+        assert_eq!(filename, 427001437295530661);
         let title = String::from("Hendrix");
         let chord = Chord {
             title: Some(&title),
@@ -263,7 +303,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 10083194593582405925);
+        assert_eq!(filename, 6949637816226260381);
     }
 
     #[test]
@@ -405,27 +445,27 @@ mod tests {
     #[test]
     fn should_render_note() {
         let note = svg_draw_note(&6, crate::GuitarString::D, &10, &0);
-        let expected = "<circle cx=\"70\" cy=\"105\" r=\"13\" />";
+        let expected = "<circle cx=\"70\" cy=\"105\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
 
         let note = svg_draw_note(&2, crate::GuitarString::E, &12, &1);
-        let expected = "<circle cx=\"50\" cy=\"80\" r=\"13\" />";
+        let expected = "<circle cx=\"50\" cy=\"68\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
 
         let note = svg_draw_note(&7, crate::GuitarString::A, &14, &2);
-        let expected = "<circle cx=\"64\" cy=\"141\" r=\"13\" />";
+        let expected = "<circle cx=\"64\" cy=\"141\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
 
         let note = svg_draw_note(&4, crate::GuitarString::G, &20, &3);
-        let expected = "<circle cx=\"110\" cy=\"100\" r=\"13\" />";
+        let expected = "<circle cx=\"110\" cy=\"100\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
 
         let note = svg_draw_note(&9, crate::GuitarString::B, &30, &5);
-        let expected = "<circle cx=\"170\" cy=\"215\" r=\"13\" />";
+        let expected = "<circle cx=\"170\" cy=\"215\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
 
         let note = svg_draw_note(&12, crate::GuitarString::HighE, &32, &10);
-        let expected = "<circle cx=\"210\" cy=\"162\" r=\"13\" />";
+        let expected = "<circle cx=\"210\" cy=\"162\" r=\"13\" fill=\"#FBF6E2\" />";
         assert_eq!(note, expected);
     }
 }
