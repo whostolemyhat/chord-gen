@@ -40,8 +40,8 @@ impl From<usize> for GuitarString {
     }
 }
 
-const LIGHT_COLOUR: &'static str = "#FBF6E2";
-const DARK_COLOUR: &'static str = "#160c1c";
+const LIGHT_COLOUR: &str = "#FBF6E2";
+const DARK_COLOUR: &str = "#160c1c";
 
 #[derive(Hash, Default)]
 pub enum Mode {

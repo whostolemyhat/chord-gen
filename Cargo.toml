@@ -1,9 +1,14 @@
 [package]
 name = "chord-gen"
-version = "0.1.0"
+version = "2.0.0"
 edition = "2021"
 authors = ["James Baum <james@jamesbaum.co.uk>"]
 default-run = "chord_cli"
+repository = "https://github.com/whostolemyhat/chord-gen"
+homepage = "https://github.com/whostolemyhat/chord-gen"
+description = "Create SVGs of guitar chords"
+license = "MIT"
+readme = "Readme.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
