@@ -11,7 +11,7 @@ use clap::{arg, Command};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("ChordGenerator")
-        .version("1.1")
+        .version("2.0")
         .author("James Baum <james@jamesbaum.co.uk>")
         .about("Creates guitar chord diagrams")
         .arg(arg!(-f --frets <FRETS> "Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.")) // comma-separated string x,x,0,2,3,2

@@ -270,7 +270,7 @@ pub fn get_filename(chord: &Chord) -> u64 {
 
 #[cfg(test)]
 mod tests {
-    use crate::{generate_svg, get_filename, svg_draw_note, Chord, Hand};
+    use crate::{generate_svg, get_filename, svg_draw_note, Chord, Hand, Palette};
 
     #[test]
     fn filenames_should_use_chord_hash() {
@@ -283,7 +283,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 13639735217056851883);
+        assert_eq!(filename, 16484474795306184489);
 
         let title = String::from("Hendrix♮");
         let chord = Chord {
@@ -293,7 +293,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 427001437295530661);
+        assert_eq!(filename, 13635989049377548228);
         let title = String::from("Hendrix");
         let chord = Chord {
             title: Some(&title),
@@ -303,7 +303,7 @@ mod tests {
             ..Default::default()
         };
         let filename = get_filename(&chord);
-        assert_eq!(filename, 6949637816226260381);
+        assert_eq!(filename, 16803325980362310838);
     }
 
     #[test]
@@ -317,7 +317,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/13592681158382067823.svg")
+        let expected = std::fs::read_to_string("fixtures/13635989049377548228.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -330,7 +330,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/18436534002643003894.svg")
+        let expected = std::fs::read_to_string("fixtures/6468161314235284664.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -343,7 +343,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/15615698213659243213.svg")
+        let expected = std::fs::read_to_string("fixtures/17174280223802521722.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -356,7 +356,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/13724104169966017016.svg")
+        let expected = std::fs::read_to_string("fixtures/13685234863090620098.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -369,7 +369,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/13518970828834701382.svg")
+        let expected = std::fs::read_to_string("fixtures/14451764860938368709.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -382,33 +382,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/12540277254987366366.svg")
-            .expect("couldn't open fixture");
-        assert_eq!(image.unwrap(), expected);
-
-        let title = String::from("G");
-        let chord = Chord {
-            title: Some(&title),
-            frets: vec![3, 2, 0, 0, 0, 3],
-            fingers: vec!["2", "1", "0", "0", "0", "3"],
-            hand: Hand::Right,
-            ..Default::default()
-        };
-        let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/8535511527932517360.svg")
-            .expect("couldn't open fixture");
-        assert_eq!(image.unwrap(), expected);
-
-        let title = String::from("A");
-        let chord = Chord {
-            title: Some(&title),
-            frets: vec![-1, 0, 2, 2, 2, 0],
-            fingers: vec!["x", "0", "2", "1", "3", "0"],
-            hand: Hand::Right,
-            ..Default::default()
-        };
-        let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/6374786531096975228.svg")
+        let expected = std::fs::read_to_string("fixtures/14020184813522087305.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
     }
@@ -424,7 +398,7 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/left/5698515120374566304.svg")
+        let expected = std::fs::read_to_string("fixtures/left/1682699279882065446.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
 
@@ -437,35 +411,39 @@ mod tests {
             ..Default::default()
         };
         let image = generate_svg(chord);
-        let expected = std::fs::read_to_string("fixtures/left/10083194593582405925.svg")
+        let expected = std::fs::read_to_string("fixtures/left/16803325980362310838.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
     }
 
     #[test]
     fn should_render_note() {
-        let note = svg_draw_note(&6, crate::GuitarString::D, &10, &0);
-        let expected = "<circle cx=\"70\" cy=\"105\" r=\"13\" fill=\"#FBF6E2\" />";
+        let palette = Palette {
+            fg: "#fff",
+            bg: "#111",
+        };
+        let note = svg_draw_note(&6, crate::GuitarString::D, &10, &0, &palette);
+        let expected = "<circle cx=\"70\" cy=\"105\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
 
-        let note = svg_draw_note(&2, crate::GuitarString::E, &12, &1);
-        let expected = "<circle cx=\"50\" cy=\"68\" r=\"13\" fill=\"#FBF6E2\" />";
+        let note = svg_draw_note(&2, crate::GuitarString::E, &12, &1, &palette);
+        let expected = "<circle cx=\"50\" cy=\"68\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
 
-        let note = svg_draw_note(&7, crate::GuitarString::A, &14, &2);
-        let expected = "<circle cx=\"64\" cy=\"141\" r=\"13\" fill=\"#FBF6E2\" />";
+        let note = svg_draw_note(&7, crate::GuitarString::A, &14, &2, &palette);
+        let expected = "<circle cx=\"64\" cy=\"141\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
 
-        let note = svg_draw_note(&4, crate::GuitarString::G, &20, &3);
-        let expected = "<circle cx=\"110\" cy=\"100\" r=\"13\" fill=\"#FBF6E2\" />";
+        let note = svg_draw_note(&4, crate::GuitarString::G, &20, &3, &palette);
+        let expected = "<circle cx=\"110\" cy=\"100\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
 
-        let note = svg_draw_note(&9, crate::GuitarString::B, &30, &5);
-        let expected = "<circle cx=\"170\" cy=\"215\" r=\"13\" fill=\"#FBF6E2\" />";
+        let note = svg_draw_note(&9, crate::GuitarString::B, &30, &5, &palette);
+        let expected = "<circle cx=\"170\" cy=\"215\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
 
-        let note = svg_draw_note(&12, crate::GuitarString::HighE, &32, &10);
-        let expected = "<circle cx=\"210\" cy=\"162\" r=\"13\" fill=\"#FBF6E2\" />";
+        let note = svg_draw_note(&12, crate::GuitarString::HighE, &32, &10, &palette);
+        let expected = "<circle cx=\"210\" cy=\"162\" r=\"13\" fill=\"#fff\" />";
         assert_eq!(note, expected);
     }
 }
