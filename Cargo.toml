@@ -1,6 +1,6 @@
 [package]
 name = "chord-gen"
-version = "2.0.0"
+version = "2.0.1"
 edition = "2021"
 authors = ["James Baum <james@jamesbaum.co.uk>"]
 default-run = "chord_cli"
