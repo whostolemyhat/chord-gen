@@ -202,7 +202,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         (Some(title), Some(suffix)) => format!(
             "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
         text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"{}\" font-weight=\"300\">{}</tspan></text>",
-            20,
+            17,
             palette.fg,
             title,
             palette.fg,
@@ -211,7 +211,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         (Some(title), None) => format!(
             "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
   text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}</text>",
-            20,
+            17,
             palette.fg,
             title,
         ),
