@@ -11,7 +11,7 @@ use clap::{arg, Command};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("ChordGenerator")
-        .version("2.0")
+        .version("2.1.0")
         .author("James Baum <james@jamesbaum.co.uk>")
         .about("Creates guitar chord diagrams")
         .arg(arg!(-f --frets <FRETS> "Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.")) // comma-separated string x,x,0,2,3,2
@@ -19,8 +19,9 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .arg(arg!(-t --title <TITLE> "Name of chord. Optional."))
         .arg(arg!(-s --suffix <SUFFIX> "Chord suffix to use in title. Optional."))
         .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`. Optional, defaults to right."))
-        .arg(arg!(-m --mode <MODE> "Light or dark mode `light` or `dark`. Optional, defaults to light"))
-        .arg(arg!(-b --background "Add a background to image"))
+        .arg(arg!(-r --barres <BARRES> "Frets which should be barred. Comma-separated string. Optional."))
+        .arg(arg!(-m --mode <MODE> "Light or dark mode `light` or `dark`. Optional, defaults to light."))
+        .arg(arg!(-b --background "Add a background to image."))
         .get_matches();
 
     let default_frets = "x,x,x,x,x,x".to_string();
@@ -36,6 +37,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap_or(&default_frets)
         .split(',')
         .collect();
+
+    let barres: Option<Vec<i32>> = match matches.get_one::<String>("barres") {
+        None => None,
+        Some(frets) => Some(
+            frets
+                .split(',')
+                .map(|f| f.parse::<i32>().unwrap_or(-1))
+                .collect::<Vec<_>>(),
+        ),
+    };
 
     let mut hand = Hand::Right;
     if let Some(h) = matches.get_one::<String>("hand") {
@@ -72,6 +83,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         suffix,
         mode,
         use_background: *use_background,
+        barres,
     };
 
     let filename = render_svg(chord, output_dir)?;

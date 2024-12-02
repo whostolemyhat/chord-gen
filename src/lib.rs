@@ -15,6 +15,7 @@ pub struct Chord<'a> {
     pub suffix: Option<&'a String>,
     pub mode: Mode,
     pub use_background: bool,
+    pub barres: Option<Vec<i32>>,
 }
 
 #[derive(Debug)]
@@ -43,7 +44,7 @@ impl From<usize> for GuitarString {
 const LIGHT_COLOUR: &str = "#FBF6E2";
 const DARK_COLOUR: &str = "#160c1c";
 
-#[derive(Hash, Default)]
+#[derive(Hash, Default, Copy, Clone)]
 pub enum Mode {
     #[default]
     Light,
@@ -104,6 +105,25 @@ fn svg_draw_min_fret(min_fret: &i32, string_space: &i32, palette: &Palette) -> S
     )
 }
 
+fn get_note_coords(
+    note: &i32,
+    string: GuitarString,
+    string_space: &i32,
+    min_fret: &i32,
+) -> (i32, i32) {
+    let offset_left = 50;
+    let offset_top = 50;
+
+    let mut offset_fret = *note;
+    if min_fret > &1 {
+        offset_fret = (note - min_fret) + 2; // 1=first playable pos
+    }
+
+    let x = offset_left + string as i32 * string_space;
+    let y = offset_fret * string_space + offset_top - (string_space / 2); // fret
+    (x, y)
+}
+
 fn svg_draw_note(
     note: &i32,
     string: GuitarString,
@@ -114,18 +134,9 @@ fn svg_draw_note(
     if note <= &0 {
         return "".to_string();
     }
-
-    let offset_left = 50;
-    let offset_top = 50;
     let radius = 13;
 
-    let mut offset_fret = *note;
-    if min_fret > &1 {
-        offset_fret = (note - min_fret) + 2; // 1=first playable pos
-    }
-
-    let x = offset_left + string as i32 * string_space;
-    let y = offset_fret * string_space + offset_top - (string_space / 2); // fret
+    let (x, y) = get_note_coords(note, string, string_space, min_fret);
     format!(
         "<circle cx=\"{}\" cy=\"{}\" r=\"{}\" fill=\"{}\" />",
         x, y, radius, palette.fg
@@ -148,6 +159,100 @@ fn get_palette<'a>(mode: Mode) -> Palette<'a> {
             bg: DARK_COLOUR,
         },
     }
+}
+
+fn svg_draw_title(chord_settings: &Chord, palette: &Palette) -> String {
+    match (chord_settings.title, chord_settings.suffix) {
+        (Some(title), Some(suffix)) => format!(
+            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+        text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"{}\" font-weight=\"300\">{}</tspan></text>",
+            18,
+            palette.fg,
+            title,
+            palette.fg,
+            suffix
+        ),
+        (Some(title), None) => format!(
+            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
+  text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}</text>",
+            18,
+            palette.fg,
+            title,
+        ),
+        _ => String::from(""),
+    }
+}
+
+fn find_all(frets: &Vec<i32>, search: &i32) -> Vec<usize> {
+    frets
+        .iter()
+        .enumerate()
+        .filter(|(index, &ref fret)| {
+            // the E9 check!
+            // does next fret exist and is played?
+            if index + 1 < frets.len() && frets[index + 1] != -1 {
+                // is next fret higher or eq?
+                return fret == search && frets[index + 1] >= *fret;
+            }
+            return fret == search;
+        })
+        .map(|(index, _)| index)
+        .collect::<Vec<_>>()
+}
+
+fn svg_draw_barres(
+    barre_fret: &i32,
+    frets: &Vec<i32>,
+    string_space: &i32,
+    min_fret: &i32,
+    palette: &Palette,
+) -> String {
+    // get first instance of fret
+    // check first doesn't have lower neighbour
+    // start at lowest string
+    // get last instance of fret
+    // draw curve
+    let strings = find_all(frets, barre_fret);
+    if strings.len() < 2 {
+        return String::from("");
+    }
+
+    let first = get_note_coords(
+        barre_fret,
+        (*strings.first().unwrap_or(&0)).into(),
+        string_space,
+        min_fret,
+    );
+    let last = get_note_coords(
+        barre_fret,
+        (*strings.last().unwrap_or(&0)).into(),
+        string_space,
+        min_fret,
+    );
+
+    // move curve out of centre of frets
+    let y_offset = if barre_fret == &1 { 27 } else { 23 };
+
+    // amount to move the controls
+    // controls the angle of curve
+    let control_y_offset = y_offset + 10;
+    let control_x_offset = 8;
+
+    let origin_control = (first.0 + control_x_offset, first.1 - control_y_offset);
+    let end_control = (last.0 - control_x_offset, last.1 - control_y_offset);
+
+    format!(
+        "<path d=\"M {} {} C {} {}, {} {}, {} {}\" stroke=\"{}\" stroke-width=\"3\" fill=\"transparent\" stroke-linecap=\"round\" />",
+        first.0,
+        first.1 - y_offset,
+        origin_control.0,
+        origin_control.1,
+        end_control.0,
+        end_control.1,
+        last.0,
+        last.1 - y_offset,
+        palette.fg
+    )
 }
 
 fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn std::error::Error>> {
@@ -176,7 +281,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         .min()
         .unwrap_or(&0);
 
-    let show_nut = (chord_settings.frets.contains(&0) && lowest_fret < &5)
+    let show_nut = (chord_settings.frets.contains(&0) && lowest_fret < &3)
         || chord_settings.frets.contains(&1);
     let nut_width = if show_nut { 9 } else { 2 };
     let nut_shape = if show_nut { "round" } else { "butt" };
@@ -198,24 +303,18 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         min_fret_marker = svg_draw_min_fret(lowest_fret, &string_space, &palette);
     }
 
-    let chord_title = match (chord_settings.title, chord_settings.suffix) {
-        (Some(title), Some(suffix)) => format!(
-            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
-        text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}<tspan font-size=\"18\" fill=\"{}\" font-weight=\"300\">{}</tspan></text>",
-            17,
-            palette.fg,
-            title,
-            palette.fg,
-            suffix
+    let chord_title = svg_draw_title(&chord_settings, &palette);
+    // if barre
+    // for each barre
+    let barres = match chord_settings.barres {
+        Some(barres) => svg_draw_barres(
+            &barres[0],
+            &chord_settings.frets,
+            &string_space,
+            &lowest_fret,
+            &palette,
         ),
-        (Some(title), None) => format!(
-            "<text x=\"150px\" y=\"{}\" class=\"text\" dominant-baseline=\"middle\"
-  text-anchor=\"middle\" font-size=\"24\" fill=\"{}\" font-weight=\"400\">{}</text>",
-            17,
-            palette.fg,
-            title,
-        ),
-        _ => String::from(""),
+        None => String::from(""),
     };
 
     let mut context = TeraContext::new();
@@ -231,6 +330,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
         "background",
         &svg_draw_bg(chord_settings.use_background, &palette),
     );
+    context.insert("barres", &barres);
 
     match Tera::one_off(include_str!("../templates/chord.svg"), &context, false) {
         Ok(result) => Ok(result),
@@ -383,6 +483,39 @@ mod tests {
         };
         let image = generate_svg(chord);
         let expected = std::fs::read_to_string("fixtures/14020184813522087305.svg")
+            .expect("couldn't open fixture");
+        assert_eq!(image.unwrap(), expected);
+
+        // nut regression
+        let title = String::from("D");
+        let suffix = String::from("m69");
+        let chord = Chord {
+            title: Some(&title),
+            frets: vec![-1, 5, 3, 4, 5, 0],
+            fingers: vec!["x", "3", "1", "2", "4", "0"],
+            hand: Hand::Right,
+            suffix: Some(&suffix),
+            ..Default::default()
+        };
+        let image = generate_svg(chord);
+        let expected = std::fs::read_to_string("fixtures/13801489451752273984.svg")
+            .expect("couldn't open fixture");
+        assert_eq!(image.unwrap(), expected);
+
+        // B9 barre regression
+        let suffix = String::from("aug69");
+        let title = String::from("B");
+        let chord = Chord {
+            title: Some(&title),
+            frets: vec![-1, 9, 8, 9, 9, 9],
+            fingers: vec!["x", "2", "1", "3", "3", "3"],
+            hand: Hand::Right,
+            suffix: Some(&suffix),
+            barres: Some(vec![9]),
+            ..Default::default()
+        };
+        let image = generate_svg(chord);
+        let expected = std::fs::read_to_string("fixtures/2945394272046755899.svg")
             .expect("couldn't open fixture");
         assert_eq!(image.unwrap(), expected);
     }
