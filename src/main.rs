@@ -1,4 +1,7 @@
-use chord_gen::{render_svg, Chord, Hand, Mode};
+use chord_gen::{
+    render_svg,
+    types::{Chord, Hand, Mode},
+};
 use clap::{arg, Command};
 
 // https://en.wikiversity.org/wiki/Template:Music_symbols
@@ -11,7 +14,7 @@ use clap::{arg, Command};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let matches = Command::new("ChordGenerator")
-        .version("2.1.0")
+        .version("2.1.1")
         .author("James Baum <james@jamesbaum.co.uk>")
         .about("Creates guitar chord diagrams")
         .arg(arg!(-f --frets <FRETS> "Notes to fret, 6 comma-separated values. 0 for open string, -1 to skip a string.")) // comma-separated string x,x,0,2,3,2
@@ -21,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .arg(arg!(-d --hand <HANDEDNESS> "Left or right handedness. `left` or `right`. Optional, defaults to right."))
         .arg(arg!(-r --barres <BARRES> "Frets which should be barred. Comma-separated string. Optional."))
         .arg(arg!(-m --mode <MODE> "Light or dark mode `light` or `dark`. Optional, defaults to light."))
-        .arg(arg!(-b --background "Add a background to image."))
+        .arg(arg!(-b --background "Add a background to image. Optional."))
         .get_matches();
 
     let default_frets = "x,x,x,x,x,x".to_string();
@@ -72,7 +75,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // cargo run -- -f "x,7,6,7,8,x" -p "x,2,1,3,4,x" -t "Hendrix" -d "right"
     // cargo run -- -f "4,3,1,1,1,x" -p "3,2,1,1,1,x" -t "Broken"
 
-    // TODO palette etc
     let output_dir = "./output/";
 
     let chord = Chord {
