@@ -41,15 +41,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         .split(',')
         .collect();
 
-    let barres: Option<Vec<i32>> = match matches.get_one::<String>("barres") {
-        None => None,
-        Some(frets) => Some(
-            frets
-                .split(',')
-                .map(|f| f.parse::<i32>().unwrap_or(-1))
-                .collect::<Vec<_>>(),
-        ),
-    };
+    let barres: Option<Vec<i32>> = matches.get_one::<String>("barres").map(|frets| {
+        frets
+            .split(',')
+            .map(|f| f.parse::<i32>().unwrap_or(-1))
+            .collect::<Vec<_>>()
+    });
 
     let mut hand = Hand::Right;
     if let Some(h) = matches.get_one::<String>("hand") {

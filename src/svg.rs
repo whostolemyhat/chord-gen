@@ -65,7 +65,7 @@ pub fn svg_draw_note(
 
 pub fn svg_draw_barres(
     barre_fret: &i32,
-    frets: &Vec<i32>,
+    frets: &[i32],
     string_space: &i32,
     min_fret: &i32,
     palette: &Palette,

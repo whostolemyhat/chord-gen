@@ -68,7 +68,7 @@ fn generate_svg(chord_settings: Chord) -> std::result::Result<String, Box<dyn st
             &barres[0],
             &chord_settings.frets,
             &string_space,
-            &lowest_fret,
+            lowest_fret,
             &palette,
         ),
         None => String::from(""),

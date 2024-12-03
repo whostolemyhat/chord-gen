@@ -41,18 +41,18 @@ pub fn get_palette<'a>(mode: Mode) -> Palette<'a> {
     }
 }
 
-pub fn find_all(frets: &Vec<i32>, search: &i32) -> Vec<usize> {
+pub fn find_all(frets: &[i32], search: &i32) -> Vec<usize> {
     frets
         .iter()
         .enumerate()
-        .filter(|(index, &ref fret)| {
+        .filter(|(index, fret)| {
             // the E9 check!
             // does next fret exist and is played?
             if index + 1 < frets.len() && frets[index + 1] != -1 {
                 // is next fret higher or eq?
-                return fret == search && frets[index + 1] >= *fret;
+                return *fret == search && frets[index + 1] >= **fret;
             }
-            return fret == search;
+            *fret == search
         })
         .map(|(index, _)| index)
         .collect::<Vec<_>>()
